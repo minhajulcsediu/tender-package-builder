@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b1220" />
+  <meta name="description" content="TenderPack - browser-only tender document checklist, validation and PDF package builder." />
+  <title>TenderPack — Tender Document Package Builder</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230b1220'/%3E%3Cpath d='M20 15h17l11 11v23H20z' fill='%237c5cff'/%3E%3Cpath d='M37 15v11h11' fill='%23a998ff'/%3E%3Cpath d='M25 37h18M25 44h13' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+  <div id="toastStack" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <button id="brandBtn" class="brand" type="button" aria-label="TenderPack home">
+        <span class="brand-mark">
+          <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M8 4h9l7 7v17H8z"/><path class="fold" d="M17 4v7h7"/><path class="line" d="M12 17h8M12 22h6"/></svg>
+        </span>
+        <span>
+          <span class="brand-name">TenderPack</span>
+          <span class="brand-sub">Document package builder</span>
+        </span>
+      </button>
+
+      <div class="topbar-actions">
+        <span class="privacy-pill"><span class="dot"></span><span data-i18n="browserOnly">Browser only</span></span>
+        <button id="languageBtn" class="ghost-btn" type="button" aria-label="Switch language">বাংলা</button>
+        <button id="importPackBtn" class="icon-btn" type="button" title="Import pack or project" aria-label="Import pack or project">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14"/></svg>
+          <span data-i18n="import">Import</span>
+        </button>
+        <input id="packInput" class="sr-only" type="file" accept=".zip,application/zip,application/x-zip-compressed" />
+      </div>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <section id="welcome" class="welcome-card">
+      <div class="welcome-copy">
+        <div class="eyebrow" data-i18n="welcomeEyebrow">READY TO ASSEMBLE</div>
+        <h1 data-i18n="welcomeTitle">Build a submission-ready tender package.</h1>
+        <p data-i18n="welcomeDesc">Load tender requirements, add PDFs, resolve every blocking issue, then generate one correctly ordered package - entirely in your browser.</p>
+        <div class="welcome-actions">
+          <button id="requirementsCta" class="primary-btn" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14m-7-7h14"/></svg>
+            <span data-i18n="loadRequirements">Load requirements.json</span>
+          </button>
+          <input id="requirementsInput" class="sr-only" type="file" accept="application/json,.json" />
+          <button id="sampleCta" class="secondary-btn" type="button">
+            <span data-i18n="trySample">Try sample pack</span>
+            <span class="kbd">ZIP</span>
+          </button>
+        </div>
+        <div class="welcome-note">
+          <span class="note-icon">✓</span>
+          <span data-i18n="welcomeNote">Up to 30 PDFs / 50 MB. Nothing is uploaded to a participant-controlled backend.</span>
+        </div>
+      </div>
+      <div class="welcome-visual" aria-hidden="true">
+        <div class="orb orb-1"></div><div class="orb orb-2"></div>
+        <div class="stack-card card-back"></div>
+        <div class="stack-card card-mid"></div>
+        <div class="stack-card card-front">
+          <div class="mini-cover-top"><span></span><span></span></div>
+          <div class="mini-title"></div><div class="mini-title short"></div>
+          <div class="mini-table"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="mini-footer"><span></span><span></span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="workspace" class="hidden">
+      <div class="page-heading">
+        <div>
+          <div class="eyebrow" data-i18n="workspaceEyebrow">TENDER WORKSPACE</div>
+          <h1 id="tenderTitle">Tender Document Package</h1>
+          <p id="tenderMeta" class="muted">Load a requirements file to begin.</p>
+        </div>
+        <div class="heading-actions">
+          <button id="importCsvBtn" class="ghost-btn dark" type="button" title="Apply a previously downloaded checklist CSV to the current files">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21V10m0 0 4 4m-4-4-4 4M5 4h14v17H5z"/></svg>
+            <span data-i18n="importCsv">Import CSV</span>
+          </button>
+          <button id="exportCsvBtn" class="ghost-btn dark" type="button" title="Download the current checklist as CSV">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 20h14"/></svg>
+            <span data-i18n="downloadCsv">Download CSV</span>
+          </button>
+          <button id="saveProjectBtn" class="secondary-btn" type="button" title="Save a portable project ZIP containing your PDFs and checklist">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12l2 2v14H5zM8 4v6h8V4M8 20v-6h8v6"/></svg>
+            <span data-i18n="saveProject">Save project</span>
+          </button>
+          <button id="openProjectBtn" class="ghost-btn dark" type="button" title="Open a previously saved TenderPack project ZIP">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6l2 2h8v12H4zM4 10h16"/></svg>
+            <span data-i18n="openProject">Open project</span>
+          </button>
+          <input id="csvInput" class="sr-only" type="file" accept=".csv,text/csv" />
+        </div>
+      </div>
+
+      <div class="stepper">
+        <div class="step active" data-step="1"><span>01</span><div><b data-i18n="stepRequirements">Requirements</b><small data-i18n="stepRequirementsSub">Tender setup</small></div></div>
+        <div class="step-line"></div>
+        <div class="step active" data-step="2"><span>02</span><div><b data-i18n="stepDocuments">Documents</b><small data-i18n="stepDocumentsSub">Upload & inspect</small></div></div>
+        <div class="step-line"></div>
+        <div class="step active" data-step="3"><span>03</span><div><b data-i18n="stepMatch">Match & validate</b><small data-i18n="stepMatchSub">Resolve blockers</small></div></div>
+        <div class="step-line"></div>
+        <div class="step" id="buildStep"><span>04</span><div><b data-i18n="stepBuild">Build package</b><small data-i18n="stepBuildSub">Generate PDF</small></div></div>
+      </div>
+
+      <div class="stats-grid">
+        <article class="stat-card stat-tender">
+          <div class="stat-label" data-i18n="tenderId">Tender ID</div>
+          <div id="statTenderId" class="stat-value mono">-</div>
+          <div id="statTenderTitle" class="stat-sub">-</div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-label" data-i18n="submissionDeadline">Submission deadline</div>
+          <div id="statDeadline" class="stat-value">-</div>
+          <div class="stat-sub" data-i18n="deadlineHint">Expiry is checked against this date.</div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-label" data-i18n="requirements">Requirements</div>
+          <div class="stat-value"><span id="statReqCount">0</span><span class="slash">/</span><span id="statRequiredCount">0</span></div>
+          <div class="stat-sub" data-i18n="requirementsHint">Required documents</div>
+        </article>
+        <article class="stat-card readiness-card">
+          <div class="readiness-copy"><div class="stat-label" data-i18n="readiness">Package readiness</div><div id="readinessText" class="readiness-text">0%</div><div id="readinessSub" class="stat-sub">-</div></div>
+          <div class="ring" id="readinessRing"><span id="readinessRingValue">0%</span></div>
+        </article>
+      </div>
+
+      <div class="main-grid">
+        <section class="panel requirements-panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-kicker" data-i18n="checklistKicker">CHECKLIST</div>
+              <h2 data-i18n="requirementsTitle">Tender requirements</h2>
+            </div>
+            <div class="panel-tools">
+              <label class="search-box">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="m16 16 5 5"/></svg>
+                <input id="reqSearch" type="search" placeholder="Search documents" data-i18n-placeholder="searchDocuments" />
+              </label>
+              <select id="statusFilter" class="compact-select" aria-label="Filter status">
+                <option value="all" data-i18n="filterAll">All</option>
+                <option value="blocking" data-i18n="filterBlocking">Blocking</option>
+                <option value="ok" data-i18n="filterOk">OK</option>
+                <option value="optional" data-i18n="filterOptional">Optional</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="requirements-table-wrap">
+            <table class="requirements-table">
+              <thead>
+                <tr>
+                  <th class="col-order">#</th>
+                  <th data-i18n="document">Document</th>
+                  <th data-i18n="requirement">Requirement</th>
+                  <th data-i18n="matchedFile">Matched file</th>
+                  <th data-i18n="expiry">Expiry</th>
+                  <th data-i18n="status">Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="requirementsBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <aside class="side-column">
+          <section class="panel upload-panel">
+            <div class="panel-header compact">
+              <div>
+                <div class="panel-kicker" data-i18n="inputKicker">INPUT FILES</div>
+                <h2 data-i18n="documentsTitle">Uploaded documents</h2>
+              </div>
+              <span id="uploadCounter" class="count-pill">0 / 30</span>
+            </div>
+            <div id="dropzone" class="dropzone" tabindex="0">
+              <div class="drop-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L8 8m4-4 4 4M5 13v6h14v-6"/></svg>
+              </div>
+              <div class="drop-title" data-i18n="dropTitle">Drop PDF files here</div>
+              <div class="drop-sub" data-i18n="dropSub">or browse from your computer</div>
+              <button id="browsePdfBtn" class="secondary-btn small" type="button" data-i18n="browseFiles">Browse files</button>
+              <input id="pdfInput" class="sr-only" type="file" accept="application/pdf,.pdf" multiple />
+            </div>
+            <div class="upload-meter">
+              <div><span data-i18n="storageUsed">Storage used</span><b id="sizeText">0 B / 50 MB</b></div>
+              <div class="meter"><i id="sizeMeter"></i></div>
+            </div>
+            <div class="files-toolbar">
+              <span id="duplicateHint" class="muted-small">No duplicate files detected.</span>
+              <button id="autoMatchBtn" class="link-btn" type="button" data-i18n="autoMatch">Auto-match names</button>
+            </div>
+            <div id="fileList" class="file-list"></div>
+          </section>
+
+          <section class="panel action-panel">
+            <div class="action-hero">
+              <div class="action-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h8l3 3v15H7zM15 3v4h4M9 13h6M9 17h6"/></svg>
+              </div>
+              <div>
+                <div class="panel-kicker" data-i18n="buildKicker">FINAL STEP</div>
+                <h2 data-i18n="packageTitle">Create package</h2>
+              </div>
+            </div>
+            <label class="toggle-row">
+              <span><b data-i18n="includeIndex">Include index page</b><small data-i18n="includeIndexSub">Bonus: document start pages</small></span>
+              <input id="includeIndex" type="checkbox" checked />
+            </label>
+            <div class="package-preview-card">
+              <div class="package-summary-head"><span data-i18n="outputPreview">Output preview</span><span class="mono" id="outputName">-</span></div>
+              <div class="package-line"><span data-i18n="pages">Pages</span><b id="outputPages">-</b></div>
+              <div class="package-line"><span data-i18n="includedDocs">Included documents</span><b id="outputDocs">-</b></div>
+              <div class="package-line"><span data-i18n="blocking">Blocking issues</span><b id="outputBlocking">-</b></div>
+            </div>
+            <button id="generateBtn" class="primary-btn wide" type="button" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>
+              <span data-i18n="generate">Generate package</span>
+            </button>
+            <div id="blockingMessage" class="blocking-box"><b>Package locked</b><span>Resolve every blocking status first.</span></div>
+            <div class="privacy-note"><span class="shield">◈</span><span data-i18n="privacyNote">PDFs are processed locally in the browser.</span></div>
+          </section>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <div id="previewModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-card preview-modal-card">
+      <div class="modal-head">
+        <div><div class="panel-kicker" data-i18n="previewKicker">DOCUMENT PREVIEW</div><h2 id="previewTitle">Preview</h2></div>
+        <button class="icon-btn close-modal" type="button" data-close-modal aria-label="Close">×</button>
+      </div>
+      <div class="preview-wrap"><canvas id="previewCanvas"></canvas></div>
+      <div id="previewMeta" class="modal-footer"></div>
+    </div>
+  </div>
+
+  <div id="progressModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="progressTitle">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card progress-card">
+      <div class="progress-mark"><div class="spinner"></div></div>
+      <div class="panel-kicker">BUILDING PACKAGE</div>
+      <h2 id="progressTitle">Preparing your PDF…</h2>
+      <p id="progressText" class="muted">Copying documents and applying page numbers.</p>
+    </div>
+  </div>
+
+  <div id="successModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="successTitle">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-card success-card">
+      <div class="success-icon">✓</div>
+      <div class="panel-kicker" data-i18n="readyKicker">PACKAGE READY</div>
+      <h2 id="successTitle">Your tender package is ready.</h2>
+      <p id="successSummary" class="muted">-</p>
+      <div class="success-actions">
+        <button id="downloadAgainBtn" class="primary-btn" type="button"><span data-i18n="downloadPackage">Download package</span></button>
+        <button class="secondary-btn" type="button" data-close-modal data-i18n="close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer"><span>TenderPack</span><span>Frontend-only • local document processing</span></footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
