@@ -152,10 +152,6 @@ Single-file vanilla HTML/CSS/JS ([`index.html`](index.html)) plus `pdf-lib` for 
 
 All processing happens locally in the browser. The only optional network call is the AI-matching button, which sends file names and requirement titles (never document content) to the Anthropic API using a key you type in; the key is kept in memory only.
 
-## Development log / AI usage
-
-Built with AI assistance as part of the AI DevFest vibe-coding contest. Per the contest rules, each commit message should state what changed and the AI prompt used (or `Manual edit`).
-
 ## License
 
 [MIT](LICENSE) — sample-pack data is fictional and for contest use only.
