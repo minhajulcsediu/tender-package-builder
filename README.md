@@ -6,6 +6,10 @@ Built for the **AI DevFest – Vibe Coding** contest (problem: *Tender Document 
 
 Everything runs **in your browser**. No tender document is ever uploaded to a server.
 
+### 🔗 Live demo: **[https://tender-builder.netlify.app/](https://tender-builder.netlify.app/)**
+
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Netlify-00C7B7?logo=netlify&logoColor=white)](https://tender-builder.netlify.app/)
+
 ![Statuses screen](screenshots/04_all_checks_passed.png)
 
 ---
@@ -75,7 +79,9 @@ The package built from the sample pack is committed at [`output/T-2026-0417_Pack
 
 ## Run it
 
-No build step, no dependencies to install.
+**Online:** open the live site → [https://tender-builder.netlify.app/](https://tender-builder.netlify.app/) in Google Chrome.
+
+**Locally:** no build step, no dependencies to install.
 
 ```bash
 git clone https://github.com/<your-username>/tender-package-builder.git
@@ -114,9 +120,9 @@ python3 -m http.server 8000   # then visit http://localhost:8000
 }
 ```
 
-## Deploy (public HTTPS)
+## Deployment
 
-A GitHub Pages workflow is included (`.github/workflows/pages.yml`). In your repo go to **Settings → Pages → Source: GitHub Actions**, push to `main`, and the site goes live at `https://<your-username>.github.io/<repo>/`.
+The app is a static site hosted on **Netlify**: [https://tender-builder.netlify.app/](https://tender-builder.netlify.app/). To deploy your own copy, connect this repo to Netlify (build command: none, publish directory: `/`) or drag the project folder into [Netlify Drop](https://app.netlify.com/drop).
 
 ## Tech
 
@@ -130,7 +136,6 @@ Single-file vanilla HTML/CSS/JS ([`index.html`](index.html)) plus `pdf-lib` for 
 ├── output/                 # package generated from the sample pack
 ├── screenshots/            # UI screenshots (statuses, expired, Bangla, result)
 ├── docs/                   # original problem statement
-├── .github/workflows/      # GitHub Pages deployment
 ├── LICENSE
 └── README.md
 ```
